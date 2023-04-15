@@ -25,7 +25,7 @@ impl<'a, T> Rope<'a, T> {
         }
     }
 
-    pub fn advance(&mut self, f: impl FnOnce(&'a mut T) -> &'a mut T) {
+    pub fn advance_map<F: for <'any> FnOnce(&'any mut T) -> &'any mut T>(&mut self, f: F) {
         // Soundness: The question of soundness here is quite pivotal, and somewhat dubious, but
         // essential. Morally, this function is called with exclusive access to self and by
         // extension the lead reference it contains, so it should be safe enough to allow a closure
@@ -40,7 +40,25 @@ impl<'a, T> Rope<'a, T> {
         // Some methods can return a reference to it, but this reference is itself connected with
         // the lifetime of self, so our exclusive reference to self means that none of those can
         // be live within advance.
+
+        // It is important that the closure satisfy a higher ranked trait bound, so that it cannot
+        // assume that it will get any particular lifetime; thus the reference cannot be safely
+        // moved out of the closure, since any lifetime would possibly be too long.
         self.lead = f(unsafe { &mut *self.lead });
+    }
+
+    pub fn advance_map_out<B, F: for <'any> FnOnce(&'any mut T) -> (&'any mut T, B)>(&mut self, f: F) -> B {
+        let f_result = f(unsafe { &mut *self.lead });
+        self.lead = f_result.0;
+        f_result.1
+    }
+
+    pub fn advance_mut<B, F: for <'any> FnOnce(&mut &'any mut T) -> B>(&mut self, f: F) -> B {
+        // Soundness: see advance_map
+        let mut lead: &'a mut T = unsafe { &mut *self.lead };
+        let result = f(&mut lead);
+        self.lead = lead;
+        result
     }
 
     pub fn anchor(&mut self) {

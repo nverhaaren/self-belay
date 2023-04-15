@@ -51,7 +51,7 @@ impl SimpleTree {
         let mut advance = true;
         let mut prune = true;
         while advance {
-            rope.advance(|node| {
+            rope.advance_map(|node| {
                 match (&node.left, &node.right) {
                     (None, None) => {
                         advance = false;
