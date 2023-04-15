@@ -170,3 +170,21 @@ fn test_unsound() {
 
     // Uncommenting the above should give a compiler error
 }
+
+#[test]
+fn test_unsound_2() {
+    // let mut x = [1; 4];
+    // let (mut front, back) = x.split_at_mut(2);
+    // let mut rope = Rope::new(back);
+    // rope.advance_map(|back| {
+    //     let parts = back.split_at_mut(1);
+    //     front = parts.0;
+    //     parts.1
+    // });
+    // let back = rope.into_anchor();
+    // front[0] *= 2;
+    // back[0] *= 2;
+    // assert_eq!(x, [4, 1, 1, 1]);
+
+    // Uncommenting above should give a compiler error about a reference escaping the closure.
+}

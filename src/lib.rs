@@ -4,19 +4,19 @@ use core::marker::PhantomData;
 mod tests;
 
 #[derive(Debug)]
-pub struct Rope<'a, T> {
+pub struct Rope<'a, T: ?Sized> {
     anchor: *mut T,
     lead: *mut T,
     phantom: PhantomData<&'a mut T>,
 }
 
 #[derive(Debug)]
-pub enum Simul<'a, T> {
+pub enum Simul<'a, T: ?Sized> {
     Advance(&'a mut T),
     Hold(&'a mut T),
 }
 
-impl<'a, T> Rope<'a, T> {
+impl<'a, T: ?Sized> Rope<'a, T> {
     pub fn new(anchor: &'a mut T) -> Self {
         Self {
             anchor,
