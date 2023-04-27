@@ -82,6 +82,54 @@ impl SimpleTree {
             _ => (),
         }
     }
+
+    fn needs_prune(&mut self) -> bool {
+        let mut node = self;
+        loop {
+            match (&node.left, &node.right) {
+                (None, None) => return true,
+                (Some(_), Some(_)) => {
+                    node.value += 1;
+                    return false;
+                }
+                _ => (),
+            }
+            match (&mut node.left, &mut node.right) {
+                (Some(left), None) => node = left.as_mut(),
+                (None, Some(right)) => node = right.as_mut(),
+                _ => unreachable!(),
+            }
+        }
+    }
+
+    fn prune_or_increment_safe_impl(&mut self, mut it: impl Iterator<Item = Direction>) -> bool {
+        match it.next() {
+            None => return self.needs_prune(),
+            Some(dir) => {
+                let child = match dir {
+                    Left => self.left.as_mut().unwrap().as_mut(),
+                    Right => self.right.as_mut().unwrap().as_mut(),
+                };
+                if child.prune_or_increment_safe_impl(it) {
+                    if self.left.is_some() && self.right.is_some() {
+                        match dir {
+                            Left => self.left = None,
+                            Right => self.right = None,
+                        }
+                        false
+                    } else {
+                        true
+                    }
+                } else {
+                    false
+                }
+            }
+        }
+    }
+
+    fn prune_or_increment_safe(&mut self, it: impl IntoIterator<Item = Direction>) {
+        self.prune_or_increment_safe_impl(it.into_iter());
+    }
 }
 
 fn directions_example() -> impl Iterator<Item = Direction> {
