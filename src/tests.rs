@@ -199,7 +199,28 @@ fn test_prune() {
 }
 
 #[test]
+fn test_prune_safe() {
+    let mut tree = create_tree_example(false, 5);
+    tree.prune_or_increment_safe(directions_example());
+    assert_eq!(
+        tree,
+        SimpleTree {
+            value: 0,
+            left: Some(Box::new(empty_tree(1))),
+            right: None,
+        }
+    );
+}
+
+#[test]
 fn test_increment() {
+    let mut tree = create_tree_example(true, 5);
+    tree.prune_or_increment(directions_example());
+    assert_eq!(tree, create_tree_example(true, 6));
+}
+
+#[test]
+fn test_increment_safe() {
     let mut tree = create_tree_example(true, 5);
     tree.prune_or_increment(directions_example());
     assert_eq!(tree, create_tree_example(true, 6));
